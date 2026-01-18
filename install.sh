@@ -484,11 +484,34 @@ show_gui() {
                     fi
 
                     if [ "${DETECTED[has_fastfetch]}" = "true" ]; then
-                        show_theme_selection_menu "fastfetch"
+                        # Show enhanced fastfetch theme menu
+                        show_fastfetch_theme_menu
                     fi
 
                     if [ "${DETECTED[has_nerdfetch]}" = "true" ]; then
                         show_theme_selection_menu "nerdfetch"
+                    fi
+
+                    # Add Tokyo Night recolor menu option
+                    local use_recolor_menu
+                    use_recolor_menu=$(zenity --question \
+                        --title="Tokyo Night Recolor Menu" \
+                        --text="Use Tokyo Night recolor menu for themes?\n\nThis allows you to select Tokyo Night variants (night, storm, light) for recoloring themes." \
+                        --width=400 2>/dev/null && echo "yes" || echo "no")
+
+                    if [ "$use_recolor_menu" = "yes" ]; then
+                        # Show Tokyo Night recolor menu for each tool
+                        if [ "${DETECTED[has_neofetch]}" = "true" ]; then
+                            show_tokyo_night_recolor_menu "neofetch"
+                        fi
+
+                        if [ "${DETECTED[has_fastfetch]}" = "true" ]; then
+                            show_tokyo_night_recolor_menu "fastfetch"
+                        fi
+
+                        if [ "${DETECTED[has_nerdfetch]}" = "true" ]; then
+                            show_tokyo_night_recolor_menu "nerdfetch"
+                        fi
                     fi
                 fi
             fi
@@ -2894,41 +2917,128 @@ ASCII
 set_wallpaper() {
     local wallpaper="$1"
 
+    echo "[VERBOSE] Starting wallpaper setup for: $wallpaper"
     log_info "Setting wallpaper: $wallpaper"
 
+    if [[ "${DETECTED[distro]}" == "fedora" ]] || [[ "${DETECTED[de]}" == "COSMIC" ]]; then
+        echo "[VERBOSE] Detected Fedora/COSMIC system"
+        log_info "Detected Fedora/COSMIC, using enhanced wallpaper methods..."
+
+        if command -v cosmic-bg &>/dev/null; then
+            echo "[VERBOSE] Found cosmic-bg, attempting to set wallpaper..."
+            log_info "Setting wallpaper with cosmic-bg..."
+            cosmic-bg "$wallpaper" 2>/dev/null || echo "[VERBOSE] cosmic-bg failed, trying next method..."
+        else
+            echo "[VERBOSE] cosmic-bg not found, skipping..."
+        fi
+
+        if command -v gsettings &>/dev/null; then
+            echo "[VERBOSE] Found gsettings, setting GNOME wallpaper..."
+            log_info "Setting wallpaper with gsettings (Fedora/COSMIC)..."
+            gsettings set org.gnome.desktop.background picture-uri "file://$wallpaper" 2>/dev/null || echo "[VERBOSE] GNOME background URI failed..."
+            gsettings set org.gnome.desktop.background picture-uri-dark "file://$wallpaper" 2>/dev/null || echo "[VERBOSE] GNOME dark background URI failed..."
+            gsettings set org.gnome.desktop.background picture-options "zoom" 2>/dev/null || echo "[VERBOSE] GNOME picture options failed..."
+            gsettings set org.gnome.desktop.background primary-color "#1a1b26" 2>/dev/null || echo "[VERBOSE] GNOME primary color failed..."
+            gsettings set org.gnome.desktop.background secondary-color "#7aa2f7" 2>/dev/null || echo "[VERBOSE] GNOME secondary color failed..."
+        else
+            echo "[VERBOSE] gsettings not found, skipping GNOME wallpaper setup..."
+        fi
+
+        if command -v swaybg &>/dev/null && [ "${DETECTED[session]}" = "wayland" ]; then
+            echo "[VERBOSE] Found swaybg, setting Wayland wallpaper..."
+            log_info "Setting wallpaper with swaybg (Fedora/COSMIC Wayland)..."
+            pkill swaybg 2>/dev/null || true
+            swaybg -i "$wallpaper" -m fill &
+        else
+            echo "[VERBOSE] swaybg not available or not on Wayland, skipping..."
+        fi
+
+        if command -v swww &>/dev/null && [ "${DETECTED[session]}" = "wayland" ]; then
+            echo "[VERBOSE] Found swww, setting Wayland wallpaper..."
+            log_info "Setting wallpaper with swww (Fedora/COSMIC Wayland)..."
+            if ! pgrep -x "swww-daemon" &>/dev/null; then
+                echo "[VERBOSE] Starting swww daemon..."
+                swww-daemon &
+                sleep 0.5
+            fi
+            swww img "$wallpaper" --transition-type none 2>/dev/null || echo "[VERBOSE] swww wallpaper set failed..."
+
+            local swww_script="$HOME/.config/tokyo-night/swww-wallpaper.sh"
+            mkdir -p "$(dirname "$swww_script")"
+            cat > "$swww_script" << SWWWSCRIPT
+#!/bin/bash
+if ! pgrep -x "swww-daemon" &>/dev/null; then
+    swww-daemon &
+    sleep 0.5
+fi
+swww img "$wallpaper" --transition-type none
+SWWWSCRIPT
+            chmod +x "$swww_script"
+            log_info "Created swww script at $swww_script"
+        else
+            echo "[VERBOSE] swww not available or not on Wayland, skipping..."
+        fi
+
+        if command -v cosmic-wallpaper-manager &>/dev/null; then
+            echo "[VERBOSE] Found cosmic-wallpaper-manager, setting wallpaper..."
+            log_info "Setting wallpaper with cosmic-wallpaper-manager..."
+            cosmic-wallpaper-manager set "$wallpaper" 2>/dev/null || echo "[VERBOSE] cosmic-wallpaper-manager failed..."
+        else
+            echo "[VERBOSE] cosmic-wallpaper-manager not found, skipping..."
+        fi
+    else
+        echo "[VERBOSE] Not Fedora/COSMIC, using standard wallpaper methods..."
+    fi
+
     if command -v gsettings &>/dev/null; then
-        gsettings set org.gnome.desktop.background picture-uri "file://$wallpaper" 2>/dev/null || true
-        gsettings set org.gnome.desktop.background picture-uri-dark "file://$wallpaper" 2>/dev/null || true
+        echo "[VERBOSE] Setting standard GNOME wallpaper..."
+        gsettings set org.gnome.desktop.background picture-uri "file://$wallpaper" 2>/dev/null || echo "[VERBOSE] Standard GNOME background URI failed..."
+        gsettings set org.gnome.desktop.background picture-uri-dark "file://$wallpaper" 2>/dev/null || echo "[VERBOSE] Standard GNOME dark background URI failed..."
+    else
+        echo "[VERBOSE] gsettings not found for standard setup..."
     fi
 
     if command -v pcmanfm &>/dev/null; then
-        pcmanfm --set-wallpaper="$wallpaper" 2>/dev/null || true
+        echo "[VERBOSE] Setting wallpaper with pcmanfm..."
+        pcmanfm --set-wallpaper="$wallpaper" 2>/dev/null || echo "[VERBOSE] pcmanfm wallpaper set failed..."
+    else
+        echo "[VERBOSE] pcmanfm not found, skipping..."
     fi
 
     if command -v feh &>/dev/null; then
-        feh --bg-fill "$wallpaper" 2>/dev/null || true
+        echo "[VERBOSE] Setting wallpaper with feh..."
+        feh --bg-fill "$wallpaper" 2>/dev/null || echo "[VERBOSE] feh wallpaper set failed..."
 
         local fehbg="$HOME/.fehbg"
         echo "#!/bin/sh" > "$fehbg"
         echo "feh --bg-fill '$wallpaper'" >> "$fehbg"
         chmod +x "$fehbg"
+    else
+        echo "[VERBOSE] feh not found, skipping..."
     fi
 
     if command -v nitrogen &>/dev/null; then
-        nitrogen --set-zoom-fill "$wallpaper" 2>/dev/null || true
+        echo "[VERBOSE] Setting wallpaper with nitrogen..."
+        nitrogen --set-zoom-fill "$wallpaper" 2>/dev/null || echo "[VERBOSE] nitrogen wallpaper set failed..."
+    else
+        echo "[VERBOSE] nitrogen not found, skipping..."
     fi
 
     if command -v swaybg &>/dev/null && [ "${DETECTED[session]}" = "wayland" ]; then
+        echo "[VERBOSE] Setting Wayland wallpaper with swaybg..."
         pkill swaybg 2>/dev/null || true
         swaybg -i "$wallpaper" -m fill &
+    else
+        echo "[VERBOSE] swaybg not available for standard Wayland setup..."
     fi
 
     if command -v swww &>/dev/null && [ "${DETECTED[session]}" = "wayland" ]; then
+        echo "[VERBOSE] Setting Wayland wallpaper with swww..."
         if ! pgrep -x "swww-daemon" &>/dev/null; then
             swww-daemon &
             sleep 0.5
         fi
-        swww img "$wallpaper" --transition-type none 2>/dev/null || true
+        swww img "$wallpaper" --transition-type none 2>/dev/null || echo "[VERBOSE] Standard swww wallpaper set failed..."
 
         local swww_script="$HOME/.config/tokyo-night/swww-wallpaper.sh"
         mkdir -p "$(dirname "$swww_script")"
@@ -2942,28 +3052,43 @@ swww img "$wallpaper" --transition-type none
 SWWWSCRIPT
         chmod +x "$swww_script"
         log_info "Created swww script at $swww_script"
+    else
+        echo "[VERBOSE] swww not available for standard Wayland setup..."
     fi
 
     if command -v hyprctl &>/dev/null; then
-        hyprctl hyprpaper wallpaper ",$wallpaper" 2>/dev/null || true
+        echo "[VERBOSE] Setting wallpaper with hyprctl..."
+        hyprctl hyprpaper wallpaper ",$wallpaper" 2>/dev/null || echo "[VERBOSE] hyprctl wallpaper set failed..."
+    else
+        echo "[VERBOSE] hyprctl not found, skipping..."
     fi
 
     if command -v xfconf-query &>/dev/null; then
-        xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "$wallpaper" 2>/dev/null || true
+        echo "[VERBOSE] Setting XFCE wallpaper..."
+        xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image -s "$wallpaper" 2>/dev/null || echo "[VERBOSE] XFCE wallpaper set failed..."
+    else
+        echo "[VERBOSE] xfconf-query not found, skipping XFCE setup..."
     fi
 
     if command -v plasma-apply-wallpaperimage &>/dev/null; then
-        plasma-apply-wallpaperimage "$wallpaper" 2>/dev/null || true
+        echo "[VERBOSE] Setting KDE wallpaper..."
+        plasma-apply-wallpaperimage "$wallpaper" 2>/dev/null || echo "[VERBOSE] KDE wallpaper set failed..."
+    else
+        echo "[VERBOSE] plasma-apply-wallpaperimage not found, skipping KDE setup..."
     fi
 
     if command -v niri &>/dev/null && [ "${DETECTED[session]}" = "wayland" ]; then
+        echo "[VERBOSE] Setting Niri wallpaper..."
         if command -v swww &>/dev/null; then
             log_info "Wallpaper set via swww for Niri"
         elif command -v swaybg &>/dev/null; then
             log_info "Wallpaper set via swaybg for Niri"
         fi
+    else
+        echo "[VERBOSE] Niri not detected or not on Wayland..."
     fi
 
+    echo "[SUCCESS] Wallpaper setup completed"
     log_success "Wallpaper set"
 }
 
@@ -3089,6 +3214,12 @@ main() {
 
     if [ "${SELECTED[neofetch]}" = "yes" ]; then
         install_neofetch_theme
+    fi
+
+    if [ "${DETECTED[has_anifetch]}" = "true" ] || [ -f "$HOME/.config/tokyo-night/anifetch.sh" ]; then
+        echo "[VERBOSE] Anifetch detected or previously installed, setting up Tokyo Night theme..."
+        source "$SCRIPT_DIR/lib/anifetch.sh"
+        install_anifetch
     fi
 
     save_config

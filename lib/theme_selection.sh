@@ -16,36 +16,43 @@ fetch_external_themes() {
     local cache_dir="$CACHE_DIR/$repo_type"
     local config_dir="$CONFIG_DIR/$repo_type"
 
+    echo "[VERBOSE] Creating directories: $cache_dir, $config_dir"
     mkdir -p "$cache_dir" "$config_dir"
 
-    log_info "Fetching themes from $repo_type repository..."
+    echo "[VERBOSE] Fetching themes from $repo_type repository..."
 
     if [ ! -d "$cache_dir/.git" ]; then
-        log_info "Cloning $repo_type repository..."
+        echo "[VERBOSE] Cloning $repo_type repository..."
         git clone --depth 1 "$repo_url" "$cache_dir"
+        echo "[VERBOSE] Repository cloned successfully"
     else
-        log_info "Updating $repo_type repository..."
+        echo "[VERBOSE] Updating $repo_type repository..."
         git -C "$cache_dir" pull
+        echo "[VERBOSE] Repository updated successfully"
     fi
 
     case "$repo_type" in
         neofetch-themes)
             if [ -d "$cache_dir/themes" ]; then
+                echo "[VERBOSE] Copying neofetch themes..."
                 cp -r "$cache_dir/themes"/* "$config_dir/"
             fi
             ;;
         neocat)
             if [ -d "$cache_dir/themes" ]; then
+                echo "[VERBOSE] Copying neocat themes..."
                 cp -r "$cache_dir/themes"/* "$config_dir/"
             fi
             ;;
         fastcat)
             if [ -d "$cache_dir/themes" ]; then
+                echo "[VERBOSE] Copying fastcat themes..."
                 cp -r "$cache_dir/themes"/* "$config_dir/"
             fi
             ;;
         dotfiles-fastfetch)
             if [ -d "$cache_dir/themes" ]; then
+                echo "[VERBOSE] Copying dotfiles-fastfetch themes..."
                 cp -r "$cache_dir/themes"/* "$config_dir/"
             fi
             ;;
@@ -402,6 +409,81 @@ show_theme_selection_menu() {
         echo ""
         echo "Please select a theme by running:"
         echo "apply_theme <repo_type> <theme_name> $target_tool [recolor]"
+    fi
+}
+
+show_fastfetch_theme_menu() {
+    local target_tool="fastfetch"
+
+    # Source the fastfetch color schemes
+    local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    source "$SCRIPT_DIR/fastfetch_color_schemes.sh"
+
+    if command -v zenity &>/dev/null; then
+        local theme_option=$(zenity --list \
+            --title="Fastfetch Theme Selection" \
+            --text="Choose a theme option for fastfetch:" \
+            --radiolist \
+            --column="Select" --column="Option" --column="Description" \
+            TRUE "external" "Use external themes from repositories" \
+            FALSE "color-scheme" "Use Tokyo Night color schemes" \
+            FALSE "both" "Use both external themes and color schemes" \
+            --width=500 --height=250 2>/dev/null) || return 1
+
+        case "$theme_option" in
+            external|both)
+                show_theme_selection_menu "fastfetch"
+                ;;
+            color-scheme|both)
+                local color_scheme=$(zenity --list \
+                    --title="Tokyo Night Color Scheme" \
+                    --text="Select Tokyo Night color scheme for fastfetch:" \
+                    --radiolist \
+                    --column="Select" --column="Scheme" --column="Description" \
+                    TRUE "tokyo-night" "Tokyo Night (default blue/magenta/cyan)" \
+                    FALSE "tokyo-storm" "Tokyo Storm (darker variant)" \
+                    FALSE "tokyo-light" "Tokyo Light (light theme)" \
+                    --width=450 --height=250 2>/dev/null) || return 1
+
+                configure_fastfetch_color_scheme "$color_scheme"
+                ;;
+        esac
+    else
+        echo "Fastfetch theme options:"
+        echo "1. Use external themes (run: show_theme_selection_menu fastfetch)"
+        echo "2. Use Tokyo Night color schemes:"
+        echo "   - tokyo-night (default)"
+        echo "   - tokyo-storm"
+        echo "   - tokyo-light"
+        echo ""
+        echo "To use color schemes, run:"
+        echo "configure_fastfetch_color_scheme <scheme>"
+    fi
+}
+
+show_tokyo_night_recolor_menu() {
+    local target_tool="$1"
+
+    if command -v zenity &>/dev/null; then
+        local variant=$(zenity --list \
+            --title="Tokyo Night Variant Selection" \
+            --text="Select Tokyo Night variant for recoloring:" \
+            --radiolist \
+            --column="Select" --column="Variant" --column="Description" \
+            TRUE "night" "Tokyo Night (default dark)" \
+            FALSE "storm" "Tokyo Storm (darker variant)" \
+            FALSE "light" "Tokyo Light (light theme)" \
+            --width=450 --height=250 2>/dev/null) || return 1
+
+        # Set the variant for recoloring
+        SELECTED[variant]="$variant"
+
+        # Show theme selection with this variant
+        show_theme_selection_menu "$target_tool"
+    else
+        echo "Tokyo Night variants available:"
+        echo "night, storm, light"
+        echo "Set SELECTED[variant] before calling show_theme_selection_menu"
     fi
 }
 
