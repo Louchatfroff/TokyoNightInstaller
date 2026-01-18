@@ -303,6 +303,23 @@ show_gui() {
                 --column="Select" --column="Type" --column="Description" \
                 $prompt_options \
                 --width=450 --height=350 2>/dev/null) || zsh_prompt_type="standard"
+
+            # Add fastfetch color scheme option
+            if [ "${DETECTED[has_fastfetch]}" = "true" ]; then
+                local ff_color_scheme
+                ff_color_scheme=$(zenity --list \
+                    --title="Fastfetch Color Scheme" \
+                    --text="Select fastfetch color scheme:" \
+                    --radiolist \
+                    --column="Select" --column="Scheme" --column="Description" \
+                    TRUE "tokyo-night" "Tokyo Night (default)" \
+                    FALSE "tokyo-storm" "Tokyo Storm (darker)" \
+                    FALSE "tokyo-light" "Tokyo Light" \
+                    FALSE "classic" "Classic colors" \
+                    FALSE "rainbow" "Rainbow colors" \
+                    --width=400 --height=300 2>/dev/null) || ff_color_scheme="tokyo-night"
+                SELECTED[fastfetch_color_scheme]="$ff_color_scheme"
+            fi
         fi
 
         local terminal_list=""
@@ -2280,6 +2297,12 @@ $logo_config
 FASTFETCHCONF
 
     log_success "Fastfetch configured"
+
+    # Apply color scheme if selected
+    if [ -n "${SELECTED[fastfetch_color_scheme]}" ]; then
+        source "$SCRIPT_DIR/lib/fastfetch_color_schemes.sh"
+        configure_fastfetch_color_scheme "${SELECTED[fastfetch_color_scheme]}"
+    fi
 }
 
 
@@ -2869,6 +2892,7 @@ INSTALLED_ICONS="${SELECTED[icons]}"
 INSTALLED_WALLPAPER="${SELECTED[wallpaper]}"
 INSTALLED_NEOFETCH="${SELECTED[neofetch]}"
 INSTALLED_NEOFETCH_DISTRO="${SELECTED[neofetch_distro]}"
+INSTALLED_FASTFETCH_COLOR_SCHEME="${SELECTED[fastfetch_color_scheme]}"
 CONF
 
     log_info "Configuration saved to $config_file"
