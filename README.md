@@ -1,7 +1,7 @@
 # Tokyo Night Theme Installer for Linux
 
 A comprehensive installer script that automatically detects your Linux environment and installs the Tokyo Night theme across all your applications.
-> **DISCLAIMER:** Ai-Generated readme and repetitive color files for praticity purposes.
+> **DISCLAIMER:** Ai-Generated readme and repetitive color files for praticity purposes. Scripts that are repeated but only with different loggin or directories also were.
 ## Features
 
 - Automatic detection of Linux distribution (including PikaOS)
