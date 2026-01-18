@@ -77,6 +77,8 @@ A comprehensive installer script that automatically detects your Linux environme
 ### System Info Tools
 - neofetch (with custom distro ASCII art)
 - fastfetch
+- anifetch (anime-themed fetch tool)
+- nerdfetch (nerd font icon-based fetch tool)
 
 ### Theme Variants
 - **Night** - The classic dark blue Tokyo Night theme
@@ -123,7 +125,8 @@ The script will:
 6. Configure PikaBar if detected (PikaOS)
 7. Optionally install the Tokyo Night icon pack
 8. Optionally download and set Tokyo Night wallpapers (via swww on Wayland)
-9. Optionally configure neofetch with distro-specific ASCII art
+9. Optionally configure neofetch/fastfetch/anifetch/nerdfetch with distro-specific ASCII art
+10. Optionally fetch and apply themes from external repositories (neofetch-themes, NeoCat, FastCat, dotfiles-fastfetch)
 
 ## Neofetch Configuration
 
@@ -139,6 +142,46 @@ Available distro icons:
 - gentoo, nixos, void, alpine, manjaro
 - pikaos, mint, pop, endeavouros, artix
 - slackware, tux (generic)
+
+## Anifetch Configuration
+
+The installer now supports anifetch, an anime-themed system information tool with:
+
+- Tokyo Night color scheme integration
+- Anime-themed ASCII art (catgirl, fox, wolf, dragon, etc.)
+- Compact info display with anime aesthetic
+- Customizable anime themes
+
+## Nerdfetch Configuration
+
+The installer now supports nerdfetch, a nerd font icon-based system information tool with:
+
+- Tokyo Night color scheme integration
+- Nerd font icon support for 20+ distributions
+- Multiple display styles (icon, minimal, full)
+- Compact info display with nerd font icons
+
+## External Theme Selection
+
+The installer now includes theme selection from external repositories:
+
+- **neofetch-themes** - Collection of neofetch themes
+- **NeoCat** - Neofetch themes with catgirl aesthetic
+- **FastCat** - Fastfetch themes with catgirl aesthetic
+- **dotfiles-fastfetch** - Fastfetch configuration collection
+
+During installation, you can choose to fetch and apply themes from these repositories to any of the supported fetch tools (neofetch, fastfetch, anifetch, nerdfetch).
+
+## Tokyo Night Recoloring
+
+All external themes can be automatically recolored with Tokyo Night colors:
+
+- **Automatic recoloring**: When applying themes from external repositories, you can choose to recolor them with Tokyo Night color scheme
+- **Variant support**: Recoloring respects the selected theme variant (night, storm, light)
+- **Tool-specific recoloring**: Each fetch tool gets appropriate Tokyo Night colors applied to its configuration
+
+The recoloring feature ensures that all themes maintain a consistent Tokyo Night aesthetic while preserving the original theme structure and layout.
+
 
 ## Manual Installation
 
@@ -215,6 +258,10 @@ On PikaOS, the installer will:
 - [Tokyo Night Theme](https://github.com/enkia/tokyo-night-vscode-theme) by enkia
 - [Tokyo Night Icons](https://github.com/ljmill/tokyo-night-icons) by ljmill
 - [Tokyo Night Wallpapers](https://github.com/tokyo-night/wallpapers)
+- [neofetch-themes](https://github.com/Chick2D/neofetch-themes) by Chick2D
+- [NeoCat](https://github.com/m3tozz/NeoCat) by m3tozz
+- [FastCat](https://github.com/m3tozz/FastCat) by m3tozz
+- [dotfiles-fastfetch](https://github.com/sofijacom/dotfiles-fastfetch) by sofijacom
 
 ## License
 

@@ -389,85 +389,110 @@ show_gui() {
     SELECTED[wms]="${selected_wms//|/ }"
     SELECTED[zsh_prompt]="${zsh_prompt_type:-standard}"
 
-    if [ "${DETECTED[has_neofetch]}" = "true" ] || [ "${DETECTED[has_fastfetch]}" = "true" ] || [ "${DETECTED[has_nerdfetch]}" = "true" ]; then
-        local install_fetch
-        local fetch_tools_text="Detected: ${DETECTED[fetch_tools]}"
-        install_fetch=$(zenity --question \
-            --title="Install Fetch Tool Themes" \
-            --text="Install Tokyo Night configuration for system fetch tools?\n\n$fetch_tools_text" \
-            --width=400 2>/dev/null && echo "yes" || echo "no")
-        SELECTED[neofetch]="$install_fetch"
+        if [ "${DETECTED[has_neofetch]}" = "true" ] || [ "${DETECTED[has_fastfetch]}" = "true" ] || [ "${DETECTED[has_nerdfetch]}" = "true" ]; then
+            local install_fetch
+            local fetch_tools_text="Detected: ${DETECTED[fetch_tools]}"
+            install_fetch=$(zenity --question \
+                --title="Install Fetch Tool Themes" \
+                --text="Install Tokyo Night configuration for system fetch tools?\n\n$fetch_tools_text" \
+                --width=400 2>/dev/null && echo "yes" || echo "no")
+            SELECTED[neofetch]="$install_fetch"
 
-        if [ "$install_fetch" = "yes" ]; then
-            local neofetch_distro
-            neofetch_distro=$(zenity --list \
-                --title="Select Distro Logo" \
-                --text="Choose distro logo for fetch tools:\n(Current: ${DETECTED[distro]})" \
-                --radiolist \
-                --column="Select" --column="ID" --column="Distro" --column="Style" \
-                TRUE "auto" "Auto-detect" "Uses current distro" \
-                FALSE "arch" "Arch Linux" "Minimal A logo" \
-                FALSE "artix" "Artix Linux" "Arch variant" \
-                FALSE "debian" "Debian" "Swirl logo" \
-                FALSE "ubuntu" "Ubuntu" "Circle of friends" \
-                FALSE "fedora" "Fedora" "Infinity logo" \
-                FALSE "opensuse" "openSUSE" "Geeko chameleon" \
-                FALSE "gentoo" "Gentoo" "G logo" \
-                FALSE "nixos" "NixOS" "Lambda snowflake" \
-                FALSE "void" "Void Linux" "Void symbol" \
-                FALSE "alpine" "Alpine Linux" "Mountain peaks" \
-                FALSE "manjaro" "Manjaro" "M blocks" \
-                FALSE "pikaos" "PikaOS" "Pika mascot" \
-                FALSE "mint" "Linux Mint" "LM leaf" \
-                FALSE "pop" "Pop!_OS" "Pop logo" \
-                FALSE "endeavouros" "EndeavourOS" "Galaxy triangle" \
-                FALSE "garuda" "Garuda Linux" "Eagle" \
-                FALSE "cachyos" "CachyOS" "Performance" \
-                FALSE "nobara" "Nobara" "Gaming focused" \
-                FALSE "bazzite" "Bazzite" "Steam deck" \
-                FALSE "kali" "Kali Linux" "Dragon" \
-                FALSE "parrot" "Parrot OS" "Security" \
-                FALSE "centos" "CentOS" "Enterprise" \
-                FALSE "rocky" "Rocky Linux" "RHEL clone" \
-                FALSE "alma" "AlmaLinux" "RHEL clone" \
-                FALSE "slackware" "Slackware" "Classic" \
-                FALSE "elementary" "elementary OS" "macOS-like" \
-                FALSE "zorin" "Zorin OS" "Windows-like" \
-                FALSE "tux" "Generic Tux" "Linux penguin" \
-                FALSE "nerd" "Nerd Font Icon" "Single glyph" \
-                --width=600 --height=550 \
-                --print-column=2 2>/dev/null) || neofetch_distro="auto"
-            SELECTED[neofetch_distro]="$neofetch_distro"
-
-            if [ "${DETECTED[has_fastfetch]}" = "true" ]; then
-                local ff_logo_type
-                ff_logo_type=$(zenity --list \
-                    --title="Fastfetch Logo Style" \
-                    --text="Select logo style for fastfetch:" \
+            if [ "$install_fetch" = "yes" ]; then
+                local neofetch_distro
+                neofetch_distro=$(zenity --list \
+                    --title="Select Distro Logo" \
+                    --text="Choose distro logo for fetch tools:\n(Current: ${DETECTED[distro]})" \
                     --radiolist \
-                    --column="Select" --column="Style" --column="Description" \
-                    TRUE "small" "Small ASCII (6-8 lines)" \
-                    FALSE "auto" "Auto builtin logo" \
-                    FALSE "none" "No logo (text only)" \
-                    --width=450 --height=250 2>/dev/null) || ff_logo_type="small"
-                SELECTED[fastfetch_logo_type]="$ff_logo_type"
-            fi
+                    --column="Select" --column="ID" --column="Distro" --column="Style" \
+                    TRUE "auto" "Auto-detect" "Uses current distro" \
+                    FALSE "arch" "Arch Linux" "Minimal A logo" \
+                    FALSE "artix" "Artix Linux" "Arch variant" \
+                    FALSE "debian" "Debian" "Swirl logo" \
+                    FALSE "ubuntu" "Ubuntu" "Circle of friends" \
+                    FALSE "fedora" "Fedora" "Infinity logo" \
+                    FALSE "opensuse" "openSUSE" "Geeko chameleon" \
+                    FALSE "gentoo" "Gentoo" "G logo" \
+                    FALSE "nixos" "NixOS" "Lambda snowflake" \
+                    FALSE "void" "Void Linux" "Void symbol" \
+                    FALSE "alpine" "Alpine Linux" "Mountain peaks" \
+                    FALSE "manjaro" "Manjaro" "M blocks" \
+                    FALSE "pikaos" "PikaOS" "Pika mascot" \
+                    FALSE "mint" "Linux Mint" "LM leaf" \
+                    FALSE "pop" "Pop!_OS" "Pop logo" \
+                    FALSE "endeavouros" "EndeavourOS" "Galaxy triangle" \
+                    FALSE "garuda" "Garuda Linux" "Eagle" \
+                    FALSE "cachyos" "CachyOS" "Performance" \
+                    FALSE "nobara" "Nobara" "Gaming focused" \
+                    FALSE "bazzite" "Bazzite" "Steam deck" \
+                    FALSE "kali" "Kali Linux" "Dragon" \
+                    FALSE "parrot" "Parrot OS" "Security" \
+                    FALSE "centos" "CentOS" "Enterprise" \
+                    FALSE "rocky" "Rocky Linux" "RHEL clone" \
+                    FALSE "alma" "AlmaLinux" "RHEL clone" \
+                    FALSE "slackware" "Slackware" "Classic" \
+                    FALSE "elementary" "elementary OS" "macOS-like" \
+                    FALSE "zorin" "Zorin OS" "Windows-like" \
+                    FALSE "tux" "Generic Tux" "Linux penguin" \
+                    FALSE "nerd" "Nerd Font Icon" "Single glyph" \
+                    --width=600 --height=550 \
+                    --print-column=2 2>/dev/null) || neofetch_distro="auto"
+                SELECTED[neofetch_distro]="$neofetch_distro"
 
-            if [ "${DETECTED[has_nerdfetch]}" = "true" ]; then
-                local nf_style
-                nf_style=$(zenity --list \
-                    --title="Nerdfetch Style" \
-                    --text="Select nerdfetch display style:" \
-                    --radiolist \
-                    --column="Select" --column="Style" --column="Description" \
-                    TRUE "icon" "Nerd Font icon + info" \
-                    FALSE "minimal" "Minimal (icon only)" \
-                    FALSE "full" "Full info display" \
-                    --width=400 --height=220 2>/dev/null) || nf_style="icon"
-                SELECTED[nerdfetch_style]="$nf_style"
+                if [ "${DETECTED[has_fastfetch]}" = "true" ]; then
+                    local ff_logo_type
+                    ff_logo_type=$(zenity --list \
+                        --title="Fastfetch Logo Style" \
+                        --text="Select logo style for fastfetch:" \
+                        --radiolist \
+                        --column="Select" --column="Style" --column="Description" \
+                        TRUE "small" "Small ASCII (6-8 lines)" \
+                        FALSE "auto" "Auto builtin logo" \
+                        FALSE "none" "No logo (text only)" \
+                        --width=450 --height=250 2>/dev/null) || ff_logo_type="small"
+                    SELECTED[fastfetch_logo_type]="$ff_logo_type"
+                fi
+
+                if [ "${DETECTED[has_nerdfetch]}" = "true" ]; then
+                    local nf_style
+                    nf_style=$(zenity --list \
+                        --title="Nerdfetch Style" \
+                        --text="Select nerdfetch display style:" \
+                        --radiolist \
+                        --column="Select" --column="Style" --column="Description" \
+                        TRUE "icon" "Nerd Font icon + info" \
+                        FALSE "minimal" "Minimal (icon only)" \
+                        FALSE "full" "Full info display" \
+                        --width=400 --height=220 2>/dev/null) || nf_style="icon"
+                    SELECTED[nerdfetch_style]="$nf_style"
+                fi
+
+                # Add theme selection from external repositories
+                local use_external_themes
+                use_external_themes=$(zenity --question \
+                    --title="External Theme Selection" \
+                    --text="Use themes from external repositories?\n\nThis will fetch themes from:\n- neofetch-themes\n- NeoCat\n- FastCat\n- dotfiles-fastfetch" \
+                    --width=400 2>/dev/null && echo "yes" || echo "no")
+
+                if [ "$use_external_themes" = "yes" ]; then
+                    # Source the theme selection script
+                    source "$SCRIPT_DIR/lib/theme_selection.sh"
+
+                    # Show theme selection menu for each fetch tool
+                    if [ "${DETECTED[has_neofetch]}" = "true" ]; then
+                        show_theme_selection_menu "neofetch"
+                    fi
+
+                    if [ "${DETECTED[has_fastfetch]}" = "true" ]; then
+                        show_theme_selection_menu "fastfetch"
+                    fi
+
+                    if [ "${DETECTED[has_nerdfetch]}" = "true" ]; then
+                        show_theme_selection_menu "nerdfetch"
+                    fi
+                fi
             fi
         fi
-    fi
 
     log_info "Selected variant: ${SELECTED[variant]}"
     log_info "Selected shells: ${SELECTED[shells]}"
