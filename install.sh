@@ -1632,7 +1632,7 @@ install_cosmic_theme() {
     mkdir -p "$cosmic_comp_dir" "$cosmic_panel_dir"
 
     # Configure Cosmic Comp (compositor)
-    local cosmic_comp_config="$cosmic_comp_dir/v1"
+    local cosmic_comp_config="$cosmic_comp_dir/v1.json"
     cat > "$cosmic_comp_config" << COSMICCOMP
 {
   "border": {
@@ -1683,7 +1683,7 @@ install_cosmic_theme() {
 COSMICCOMP
 
     # Configure Cosmic Panel
-    local cosmic_panel_config="$cosmic_panel_dir/v1"
+    local cosmic_panel_config="$cosmic_panel_dir/v1.json"
     cat > "$cosmic_panel_config" << COSMICPANEL
 {
   "anchor": "top",
