@@ -54,6 +54,7 @@ A comprehensive installer script that automatically detects your Linux environme
 - Sway
 - Hyprland
 - Niri (with focus ring and border colors)
+- Fedora Cosmic (with compositor and panel theming)
 - GNOME
 - KDE Plasma
 - XFCE

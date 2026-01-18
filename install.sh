@@ -192,6 +192,7 @@ detect_de_wm() {
         pgrep -x "wayfire" &>/dev/null && wms+=("wayfire")
         pgrep -x "niri" &>/dev/null && wms+=("niri")
         command -v niri &>/dev/null && wms+=("niri")
+        pgrep -x "cosmic" &>/dev/null && wms+=("cosmic")
     else
         pgrep -x "i3" &>/dev/null && wms+=("i3")
         pgrep -x "bspwm" &>/dev/null && wms+=("bspwm")
@@ -210,6 +211,7 @@ detect_de_wm() {
     [ "${DETECTED[de]}" = "Cinnamon" ] && wms+=("cinnamon")
     [ "${DETECTED[de]}" = "LXQt" ] && wms+=("lxqt")
     [ "${DETECTED[de]}" = "Budgie" ] && wms+=("budgie")
+    [ "${DETECTED[de]}" = "COSMIC" ] && wms+=("cosmic")
 
     command -v swww &>/dev/null && DETECTED[has_swww]="true"
     command -v neofetch &>/dev/null && DETECTED[has_neofetch]="true"
@@ -1592,6 +1594,108 @@ NIRICONF
     log_success "Niri theme installed"
 }
 
+install_cosmic_theme() {
+    log_info "Installing Tokyo Night theme for Fedora Cosmic..."
+
+    get_colors
+
+    # Cosmic uses GTK theming and custom configuration files
+    local cosmic_config_dir="$HOME/.config/cosmic"
+    local cosmic_comp_dir="$cosmic_config_dir/com.system76.CosmicComp"
+    local cosmic_panel_dir="$cosmic_config_dir/com.system76.CosmicPanel"
+
+    mkdir -p "$cosmic_comp_dir" "$cosmic_panel_dir"
+
+    # Configure Cosmic Comp (compositor)
+    local cosmic_comp_config="$cosmic_comp_dir/v1"
+    cat > "$cosmic_comp_config" << COSMICCOMP
+{
+  "border": {
+    "active_color": [${BLUE:1:2}, ${BLUE:3:2}, ${BLUE:5:2}],
+    "inactive_color": [${COMMENT:1:2}, ${COMMENT:3:2}, ${COMMENT:5:2}],
+    "radius": 8.0,
+    "width": 2
+  },
+  "focus_follows_cursor": false,
+  "focus_follows_cursor_delay": 250,
+  "active_hint": true,
+  "autotiling": true,
+  "gaps": {
+    "inner": 4,
+    "outer": {
+      "bottom": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0
+    }
+  },
+  "input_default": {
+    "acceleration": "adaptive",
+    "click_method": "clickfinger",
+    "disable_while_typing": true,
+    "scroll_method": "twofinger",
+    "tap": true
+  },
+  "input_touchpad": {
+    "acceleration": "adaptive",
+    "click_method": "clickfinger",
+    "disable_while_typing": true,
+    "scroll_method": "twofinger",
+    "tap": true
+  },
+  "workspaces": {
+    "workspace_layout": "horizontal"
+  },
+  "xkb_config": {
+    "layout": "us",
+    "options": null,
+    "repeat_delay": 600,
+    "repeat_rate": 25,
+    "rules": "",
+    "variant": ""
+  }
+}
+COSMICCOMP
+
+    # Configure Cosmic Panel
+    local cosmic_panel_config="$cosmic_panel_dir/v1"
+    cat > "$cosmic_panel_config" << COSMICPANEL
+{
+  "anchor": "top",
+  "anchor_gap": false,
+  "background": [${BG:1:2}, ${BG:3:2}, ${BG:5:2}, 0.9],
+  "plugins_wings": {
+    "center": [
+      "workspaces"
+    ],
+    "end": [
+      "network_manager",
+      "bluetooth",
+      "audio",
+      "battery",
+      "notifications",
+      "clock"
+    ],
+    "start": [
+      "launcher"
+    ]
+  },
+  "size": "m",
+  "toplevel_placement": "above_layer_shell"
+}
+COSMICPANEL
+
+    # Configure GTK theme for Cosmic
+    install_gtk_theme
+
+    # Configure icon theme
+    if [ "${SELECTED[icons]}" = "yes" ]; then
+        install_icons
+    fi
+
+    log_success "Fedora Cosmic theme installed"
+}
+
 
 install_pikabar_theme() {
     log_info "Installing Tokyo Night theme for PikaBar..."
@@ -2870,6 +2974,7 @@ install_wms() {
             sway) install_sway_theme ;;
             hyprland) install_hyprland_theme ;;
             niri) install_niri_theme ;;
+            cosmic) install_cosmic_theme ;;
             pikabar) install_pikabar_theme ;;
             waybar) install_waybar_theme ;;
             gnome|kde|xfce) install_gtk_theme ;;
