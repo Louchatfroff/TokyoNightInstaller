@@ -2145,6 +2145,12 @@ install_gtk_theme() {
     log_success "GTK theme configuration installed"
 }
 
+install_hyprland_compatibility() {
+    # Source the Hyprland compatibility script
+    source "$SCRIPT_DIR/lib/hyprland_compat.sh"
+    install_hyprland_compatibility "${SELECTED[variant]}"
+}
+
 
 install_icons() {
     log_info "Installing Tokyo Night icons..."
@@ -3127,6 +3133,7 @@ install_wms() {
             cosmic) install_cosmic_theme ;;
             pikabar) install_pikabar_theme ;;
             waybar) install_waybar_theme ;;
+            hyprland-compat) install_hyprland_compatibility ;;
             gnome|kde|xfce) install_gtk_theme ;;
         esac
     done

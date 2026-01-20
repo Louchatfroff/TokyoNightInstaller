@@ -65,6 +65,8 @@ A comprehensive installer script that automatically detects your Linux environme
 
 ### Bars
 - PikaBar (with icon theme integration)
+- Waybar (with Hyprland compatibility)
+- Hyprland-specific Waybar enhancements
 
 ### Wallpaper Tools
 - feh
@@ -244,6 +246,62 @@ Or manually remove:
 | Cyan    | `#0f4b6e` |
 | Blue    | `#34548a` |
 | Magenta | `#5a4a78` |
+
+## Hyprland Compatibility
+
+The installer now includes enhanced Hyprland compatibility with JaKooLit's Hyprland-Dots style configurations:
+
+### Hyprland-Specific Features
+
+- **Enhanced Waybar Configuration**: Hyprland-specific modules including:
+  - Active workspace indicator
+  - Submap indicator
+  - Window title display
+  - Keyboard layout indicator
+  - Enhanced tooltips and styling
+
+- **Hyprland-Optimized Fastfetch**: Custom Fastfetch configuration with:
+  - Hyprland version detection
+  - Waybar version detection
+  - swww wallpaper daemon info
+  - Tokyo Night color scheme integration
+  - Additional system modules (GPU, disk, battery, temperature, etc.)
+
+- **Startup Scripts**: Automatic management of:
+  - Waybar launcher with proper restart handling
+  - Fastfetch with Tokyo Night theme
+  - Wallpaper setup via swww
+  - GTK theme application
+
+- **Hyprland Configuration Snippet**: Ready-to-use Hyprland config with:
+  - Tokyo Night color scheme variables
+  - Window rules for system tools
+  - Keybindings for Tokyo Night applications
+  - Startup applications (Waybar, Mako, swww, etc.)
+
+### Usage
+
+To use Hyprland compatibility:
+
+1. Select "hyprland-compat" in the WM/DE selection menu
+2. The installer will create:
+   - Enhanced Waybar config at `~/.config/waybar/`
+   - Hyprland Fastfetch config at `~/.config/fastfetch/`
+   - Startup scripts at `~/.config/tokyo-night/hyprland/`
+   - Hyprland config snippet at `~/.config/hypr/tokyo-night-snippet.conf`
+
+3. Add this to your Hyprland config:
+```conf
+source = ~/.config/hypr/tokyo-night-snippet.conf
+exec-once = $HOME/.config/tokyo-night/hyprland/hyprland-startup.sh
+```
+
+### Keybindings
+
+The Hyprland snippet includes useful keybindings:
+- `Super+F1`: Launch Fastfetch with Tokyo Night theme
+- `Super+F12`: Restart Waybar
+- `Super+Shift+R`: Reload Hyprland config
 
 ## PikaOS Specific
 
